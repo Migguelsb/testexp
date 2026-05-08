@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Otimização de Van - Pet Shop</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f4f7fb;
+    padding:40px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    background:white;
+    padding:30px;
+    border-radius:16px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+h1{
+    color:#1f4e79;
+    margin-bottom:20px;
+}
+
+.inputs{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+    margin-bottom:25px;
+}
+
+.input-group{
+    display:flex;
+    flex-direction:column;
+}
+
+label{
+    margin-bottom:8px;
+    font-weight:bold;
+}
+
+input{
+    padding:12px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:16px;
+}
+
+button{
+    background:#1f4e79;
+    color:white;
+    border:none;
+    padding:14px 22px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:16px;
+}
+
+button:hover{
+    background:#163a5a;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:30px;
+}
+
+th,td{
+    border:1px solid #ddd;
+    padding:14px;
+    text-align:center;
+}
+
+th{
+    background:#1f4e79;
+    color:white;
+}
+
+.resultado{
+    margin-top:30px;
+    background:#eef5ff;
+    padding:25px;
+    border-radius:12px;
+    border-left:6px solid #28a745;
+}
+
+.valor{
+    color:#28a745;
+    font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🚚 Otimização Inteligente da Van</h1>
+
+<div class="inputs">
+
+    <div class="input-group">
+        <label>Peso máximo da van (kg)</label>
+        <input type="number" id="pesoMax" value="100">
+    </div>
+
+    <div class="input-group">
+        <label>Volume máximo da van (m³)</label>
+        <input type="number" id="volumeMax" value="70">
+    </div>
+
+</div>
+
+<button onclick="otimizar()">
+    Maximizar Lucro
+</button>
+
+<table>
+
+<thead>
+<tr>
+<th>Produto</th>
+<th>Peso</th>
+<th>Volume</th>
+<th>Preço Venda</th>
+<th>Lucro</th>
+</tr>
+</thead>
+
+<tbody id="produtos"></tbody>
+
+</table>
+
+<div id="resultado" class="resultado" style="display:none;"></div>
+
+</div>
+
+<script>
+
+// PRODUTOS
+const itens = [
+
+{
+    nome:"Ração Premium",
+    peso:5,
+    volume:4,
+    preco:120,
+    lucro:40
+},
+
+{
+    nome:"Brinquedo",
+    peso:2,
+    volume:1,
+    preco:50,
+    lucro:25
+},
+
+{
+    nome:"Areia Gatos",
+    peso:4,
+    volume:3,
+    preco:80,
+    lucro:35
+},
+
+{
+    nome:"Caminha Pet",
+    peso:2,
+    volume:8,
+    preco:79,
+    lucro:30
+},
+
+{
+    nome:"Shampoo",
+    peso:1,
+    volume:1,
+    preco:30,
+    lucro:15
+},
+
+{
+    nome:"Coleira",
+    peso:1,
+    volume:1,
+    preco:45,
+    lucro:20
+},
+
+{
+    nome:"Petisco",
+    peso:3,
+    volume:2,
+    preco:70,
+    lucro:30
+}
+
+];
+
+// MOSTRAR PRODUTOS
+const tbody = document.getElementById("produtos");
+
+itens.forEach(item=>{
+
+    tbody.innerHTML += `
+    
+    <tr>
+
+        <td>${item.nome}</td>
+        <td>${item.peso}kg</td>
+        <td>${item.volume}m³</td>
+        <td>R$ ${item.preco}</td>
+        <td class="valor">R$ ${item.lucro}</td>
+
+    </tr>
+    
+    `;
+});
+
+// OTIMIZAÇÃO
+function otimizar(){
+
+    const pesoMax = Number(
+        document.getElementById("pesoMax").value
+    );
+
+    const volumeMax = Number(
+        document.getElementById("volumeMax").value
+    );
+
+    let pesoAtual = 0;
+    let volumeAtual = 0;
+    let lucroTotal = 0;
+    let vendaTotal = 0;
+
+    let itensEscolhidos = [];
+
+    // ORDENAR POR EFICIÊNCIA
+    const ordenados = [...itens].sort((a,b)=>{
+
+        const ea = a.lucro / (a.peso + a.volume);
+        const eb = b.lucro / (b.peso + b.volume);
+
+        return eb - ea;
+    });
+
+    // PREENCHER VAN
+    while(true){
+
+        let adicionou = false;
+
+        for(let item of ordenados){
+
+            if(
+                pesoAtual + item.peso <= pesoMax &&
+                volumeAtual + item.volume <= volumeMax
+            ){
+
+                pesoAtual += item.peso;
+                volumeAtual += item.volume;
+
+                lucroTotal += item.lucro;
+                vendaTotal += item.preco;
+
+                itensEscolhidos.push(item);
+
+                adicionou = true;
+            }
+        }
+
+        if(!adicionou){
+            break;
+        }
+    }
+
+    // AGRUPAR
+    let agrupados = {};
+
+    itensEscolhidos.forEach(item=>{
+
+        if(!agrupados[item.nome]){
+
+            agrupados[item.nome] = {
+                qtd:0,
+                peso:item.peso,
+                volume:item.volume,
+                preco:item.preco,
+                lucro:item.lucro
+            };
+        }
+
+        agrupados[item.nome].qtd++;
+    });
+
+    let html = "";
+
+    for(let nome in agrupados){
+
+        let item = agrupados[nome];
+
+        html += `
+        
+        <li>
+
+            <strong>${nome}</strong>
+            → Quantidade: ${item.qtd}
+            | Peso Total: ${item.qtd * item.peso}kg
+            | Volume Total: ${item.qtd * item.volume}m³
+            | Lucro: R$ ${item.qtd * item.lucro}
+
+        </li>
+        
+        `;
+    }
+
+    document.getElementById("resultado").style.display = "block";
+
+    document.getElementById("resultado").innerHTML = `
+
+    <h2>✅ Melhor carga encontrada</h2>
+
+    <br>
+
+    <p>
+        <strong>Peso usado:</strong>
+        ${pesoAtual}kg / ${pesoMax}kg
+    </p>
+
+    <p>
+        <strong>Volume usado:</strong>
+        ${volumeAtual}m³ / ${volumeMax}m³
+    </p>
+
+    <p>
+        <strong>Total em vendas:</strong>
+        R$ ${vendaTotal}
+    </p>
+
+    <p>
+        <strong>Lucro máximo:</strong>
+        <span class="valor">
+            R$ ${lucroTotal}
+        </span>
+    </p>
+
+    <br>
+
+    <h3>📦 Produtos carregados</h3>
+
+    <ul>
+        ${html}
+    </ul>
+
+    `;
+}
+
+</script>
+
+</body>
+</html>
